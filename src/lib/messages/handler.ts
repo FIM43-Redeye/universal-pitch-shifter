@@ -18,6 +18,8 @@ import type {
   SiteModeResponse,
   VinesauceResponse,
   CleanupResponse,
+  SavePresetResponse,
+  PipelineForPresetResponse,
   ActiveFilterInfo,
   FilterInfoMessage,
 } from './types';
@@ -26,6 +28,7 @@ import type { FilterPipeline } from '../../filters/pipeline';
 import type { AudioFilter } from '../../filters/base';
 import type { FilterCategory } from '../../filters/registry';
 import type { SerializablePipelineState, SiteMode } from '../storage/schema';
+import { presets } from '../presets/preset-manager';
 
 // =============================================================================
 // Handler Context
@@ -97,7 +100,9 @@ type AnyResponse =
   | MoveFilterResponse
   | SiteModeResponse
   | VinesauceResponse
-  | CleanupResponse;
+  | CleanupResponse
+  | SavePresetResponse
+  | PipelineForPresetResponse;
 
 // =============================================================================
 // Main Handler
@@ -288,9 +293,87 @@ export async function handleMessage(
         }
       }
 
-      case 'LOAD_PRESET':
-        // TODO: Implement when integrated with StorageManager
-        return { success: false, error: `Preset loading not yet implemented: ${message.presetId}` };
+      case 'LOAD_PRESET': {
+        try {
+          const preset = await presets.getById(message.presetId);
+          if (!preset) {
+            return { success: false, error: `Preset not found: ${message.presetId}` };
+          }
+          // Clear existing filters
+          for (const [instanceId] of context.filters) {
+            await context.removeFilter(instanceId);
+          }
+          // Add filters from the preset
+          for (const filterState of preset.pipeline.filters) {
+            const { filter } = await context.addFilter(filterState.typeId);
+            for (const [name, value] of Object.entries(filterState.parameters)) {
+              filter.setParameter(name, value);
+            }
+            filter.bypassed = !filterState.enabled;
+          }
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: String(error) };
+        }
+      }
+
+      case 'SAVE_PRESET': {
+        try {
+          // Get current pipeline state from context
+          const filters: Array<{
+            typeId: string;
+            instanceId: string;
+            enabled: boolean;
+            parameters: Record<string, number | boolean>;
+          }> = [];
+          for (const [instanceId, { filter }] of context.filters) {
+            const params: Record<string, number | boolean> = {};
+            for (const p of filter.parameters) {
+              params[p.name] = p.value;
+            }
+            filters.push({
+              typeId: filter.name,
+              instanceId,
+              enabled: !filter.bypassed,
+              parameters: params,
+            });
+          }
+
+          const preset = await presets.createFromState(
+            { filters },
+            {
+              name: message.name,
+              description: message.description,
+              tags: message.tags,
+            }
+          );
+          return { success: true, preset } as SavePresetResponse;
+        } catch (error) {
+          return { success: false, error: String(error) };
+        }
+      }
+
+      case 'GET_PIPELINE_FOR_PRESET': {
+        const filters: Array<{
+          typeId: string;
+          instanceId: string;
+          enabled: boolean;
+          parameters: Record<string, number | boolean>;
+        }> = [];
+        for (const [instanceId, { filter }] of context.filters) {
+          const params: Record<string, number | boolean> = {};
+          for (const p of filter.parameters) {
+            params[p.name] = p.value;
+          }
+          filters.push({
+            typeId: filter.name,
+            instanceId,
+            enabled: !filter.bypassed,
+            parameters: params,
+          });
+        }
+        return { success: true, pipeline: { filters } } as PipelineForPresetResponse;
+      }
 
       case 'GET_SITE_MODE':
         return {

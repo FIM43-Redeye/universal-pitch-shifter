@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audio Filter Framework</title>
-  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="sidepanel.css">
 </head>
 <body>
-  <div class="container">
+  <div class="container sidepanel">
     <header>
       <h1>Audio Filters</h1>
       <span id="status" class="status">Initializing...</span>
@@ -50,9 +50,9 @@
       <section class="presets-section">
         <h2 class="section-header" id="presets-toggle">
           Presets
-          <span class="chevron">+</span>
+          <span class="chevron">-</span>
         </h2>
-        <div id="presets-content" class="collapsible collapsed">
+        <div id="presets-content" class="collapsible">
           <div class="preset-buttons">
             <button id="preset-save" class="btn preset-btn">Save</button>
             <button id="preset-load" class="btn preset-btn">Load</button>
@@ -88,14 +88,12 @@
     <footer>
       <span id="engine-label" class="engine-label">SoundTouch</span>
       <span class="separator">|</span>
-      <button id="open-sidepanel" class="link-btn" title="Open in side panel">Side Panel</button>
-      <span class="separator">|</span>
       <a href="https://github.com/anthropics/universal-pitch-shifter" target="_blank">
         GPL-2.0
       </a>
     </footer>
   </div>
 
-  <script type="module" src="popup.ts"></script>
+  <script type="module" src="sidepanel.ts"></script>
 </body>
 </html>

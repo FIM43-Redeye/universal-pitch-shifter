@@ -220,6 +220,21 @@ footer a:hover {
   color: var(--accent);
 }
 
+/* Button styled like a link */
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.link-btn:hover {
+  color: var(--accent);
+}
+
 .separator {
   margin: 0 8px;
   color: var(--bg-tertiary);
@@ -832,70 +847,45 @@ footer a:hover {
    Filter Browser Modal
    ============================================================================= */
 
-.filter-browser-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.filter-browser-overlay.visible {
-  opacity: 1;
-}
-
-.filter-browser-modal {
-  background: var(--bg-primary);
-  border: 1px solid var(--bg-tertiary);
-  border-radius: var(--border-radius);
-  width: 260px;
-  max-height: 400px;
+/* Filter Browser - Inline Panel (replaces container content) */
+.filter-browser-panel {
   display: flex;
   flex-direction: column;
-  transform: translateY(-10px);
-  transition: transform 200ms ease;
-}
-
-.filter-browser-overlay.visible .filter-browser-modal {
-  transform: translateY(0);
+  height: 100%;
+  min-height: 200px;
 }
 
 .filter-browser-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px;
+  gap: 8px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--bg-tertiary);
 }
 
-.filter-browser-header h2 {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.filter-browser-close {
-  width: 24px;
-  height: 24px;
+.filter-browser-back {
+  width: 28px;
+  height: 28px;
   padding: 0;
-  background: transparent;
-  border: none;
-  font-size: 18px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 4px;
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all var(--transition);
 }
 
-.filter-browser-close:hover {
+.filter-browser-back:hover {
+  background: var(--bg-tertiary);
   color: var(--text-primary);
+}
+
+.filter-browser-title {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .filter-browser-search {
@@ -1095,4 +1085,103 @@ footer a:hover {
 
 .preset-item.factory {
   border-left: 2px solid var(--accent);
+}
+
+/* =============================================================================
+   Toast/Snackbar Notifications
+   ============================================================================= */
+
+.toast-container {
+  position: fixed;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 200ms ease;
+  pointer-events: auto;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-hiding {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.toast-message {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.toast-action {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.toast-action:hover {
+  text-decoration: underline;
+}
+
+.toast-dismiss {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity var(--transition);
+}
+
+.toast-dismiss:hover {
+  opacity: 1;
+}
+
+/* Toast type variants */
+.toast-success {
+  border-left: 3px solid var(--success);
+}
+
+.toast-warning {
+  border-left: 3px solid #f39c12;
+}
+
+.toast-error {
+  border-left: 3px solid var(--danger);
+}
+
+.toast-info {
+  border-left: 3px solid var(--accent);
 }

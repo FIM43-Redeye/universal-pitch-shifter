@@ -37,6 +37,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       break;
 
+    case "open-sidepanel":
+      // Open the side panel for the current window
+      chrome.sidePanel.open({ windowId: sender.tab?.windowId }).then(() => {
+        sendResponse({ success: true });
+      }).catch((error) => {
+        console.error("[UPS] Failed to open side panel:", error);
+        sendResponse({ success: false, error: String(error) });
+      });
+      return true; // Async response
+
+    case "set-badge":
+      // Update the badge text (for pitch display)
+      if (message.text !== undefined) {
+        chrome.action.setBadgeText({ text: message.text, tabId });
+        chrome.action.setBadgeBackgroundColor({ color: '#4CAF50', tabId });
+      }
+      sendResponse({ success: true });
+      break;
+
+    case "clear-badge":
+      chrome.action.setBadgeText({ text: '', tabId });
+      sendResponse({ success: true });
+      break;
+
     default:
       // Forward message to content script
       if (tabId) {
@@ -52,6 +76,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Clean up when tabs are closed
 chrome.tabs.onRemoved.addListener((tabId) => {
   activeTabs.delete(tabId);
+  chrome.action.setBadgeText({ text: '', tabId });
 });
 
 console.log("[UPS] Service worker initialized");

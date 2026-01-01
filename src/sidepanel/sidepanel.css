@@ -1,0 +1,89 @@
+/**
+ * Side Panel Styles
+ *
+ * Imports shared popup styles and adds sidepanel-specific overrides.
+ * The side panel has more space, so we can use a wider layout.
+ */
+
+@import '../popup/popup.css';
+
+/* =============================================================================
+   Side Panel Layout Overrides
+   ============================================================================= */
+
+/* The side panel has more width to work with */
+.container.sidepanel {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  border-radius: 0;
+}
+
+/* Header can be a bit more spacious */
+.sidepanel header {
+  padding: 16px;
+}
+
+.sidepanel header h1 {
+  font-size: 18px;
+}
+
+/* Main content gets more padding */
+.sidepanel main {
+  padding: 12px 16px;
+}
+
+/* Filters section */
+.sidepanel .filters-section {
+  margin-bottom: 16px;
+}
+
+/* Filter panels in side panel can be wider */
+.sidepanel .filter-panel {
+  margin-bottom: 12px;
+}
+
+/* Parameter controls can spread out more */
+.sidepanel .param-control {
+  padding: 10px 12px;
+}
+
+/* Sliders have more room */
+.sidepanel .slider-control input[type="range"] {
+  margin: 8px 0;
+}
+
+/* Filter browser gets more space */
+.sidepanel .filter-browser-panel {
+  max-height: none;
+}
+
+.sidepanel .filter-browser-list {
+  max-height: 60vh;
+}
+
+.sidepanel .filter-browser-card {
+  padding: 14px;
+}
+
+/* Presets section - not collapsed by default in sidepanel */
+.sidepanel .presets-section .collapsible {
+  /* Override collapsed default */
+}
+
+/* Debug section can show more output */
+.sidepanel .debug-output {
+  max-height: 300px;
+}
+
+/* Footer stays at bottom */
+.sidepanel footer {
+  padding: 12px 16px;
+}
+
+/* Toast container adjustments for side panel */
+.sidepanel .toast-container {
+  bottom: 60px;
+  left: 16px;
+  right: 16px;
+}

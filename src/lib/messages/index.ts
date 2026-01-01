@@ -21,6 +21,8 @@ export type {
   SiteModeResponse,
   VinesauceResponse,
   CleanupResponse,
+  SavePresetResponse,
+  PipelineForPresetResponse,
   ActiveFilterInfo,
   FilterInfoMessage,
   LegacyMessage,

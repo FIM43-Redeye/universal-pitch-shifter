@@ -1,8 +1,9 @@
 /**
- * Popup Script
+ * Side Panel Script
  *
  * Filter-agnostic UI for the audio filter framework.
- * Uses typed messages and dynamically generated parameter controls.
+ * This is the side panel version with more screen real estate.
+ * Shares the same components as the popup.
  */
 
 import type {
@@ -14,14 +15,14 @@ import type {
   ActiveFilterInfo,
   FilterInfoMessage,
 } from '../lib/messages/types';
-import { showFilterBrowser } from './components/filter-browser';
+import { showFilterBrowser } from '../popup/components/filter-browser';
 import {
   createFilterPanel,
   updateFilterPanel,
   createEmptyFiltersMessage,
   enablePanelDragDrop,
-} from './components/filter-panel';
-import { toast } from './components/toast';
+} from '../popup/components/filter-panel';
+import { toast } from '../popup/components/toast';
 import { presets } from '../lib/presets/preset-manager';
 import type { Preset } from '../lib/storage/schema';
 import type { SavePresetResponse } from '../lib/messages/types';
@@ -66,9 +67,6 @@ const debugVinesauceBtn = document.getElementById('debug-vinesauce') as HTMLButt
 const debugOutput = document.getElementById('debug-output') as HTMLPreElement;
 const debugCopyBtn = document.getElementById('debug-copy') as HTMLButtonElement;
 
-// Side panel
-const sidePanelBtn = document.getElementById('open-sidepanel') as HTMLButtonElement;
-
 // =============================================================================
 // Initialization
 // =============================================================================
@@ -104,14 +102,17 @@ async function init(): Promise<void> {
   debugVinesauceBtn.addEventListener('click', handleDebugVinesauce);
   debugCopyBtn.addEventListener('click', handleDebugCopy);
 
-  // Side panel button
-  sidePanelBtn.addEventListener('click', handleOpenSidePanel);
-
   // Enable drag-and-drop reordering
   enablePanelDragDrop(filtersContainer, handleFilterReorder);
 
   // Initial state fetch
   await refreshState();
+
+  // Listen for tab changes to update state
+  chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    currentTabId = activeInfo.tabId;
+    await refreshState();
+  });
 }
 
 // =============================================================================
@@ -163,7 +164,7 @@ async function refreshState(): Promise<void> {
       renderFilters();
     }
   } catch (error) {
-    console.error('[Popup] Failed to refresh state:', error);
+    console.error('[SidePanel] Failed to refresh state:', error);
     setStatus('Error', 'error');
   }
 }
@@ -354,7 +355,7 @@ async function handlePresetLoad(): Promise<void> {
       return;
     }
 
-    // Build a simple selection prompt (could be improved to an inline picker later)
+    // Build a simple selection prompt
     const presetList = allPresets.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
     const selection = prompt(`Select preset (1-${allPresets.length}):\n\n${presetList}`);
 
@@ -510,23 +511,8 @@ async function sendMessage(message: RequestMessage): Promise<unknown> {
   try {
     return await chrome.tabs.sendMessage(currentTabId, message, { frameId: 0 });
   } catch (error) {
-    console.error('[Popup] Message failed:', error);
+    console.error('[SidePanel] Message failed:', error);
     return null;
-  }
-}
-
-// =============================================================================
-// Side Panel
-// =============================================================================
-
-async function handleOpenSidePanel(): Promise<void> {
-  try {
-    await chrome.runtime.sendMessage({ command: 'open-sidepanel' });
-    // Close the popup after opening side panel
-    window.close();
-  } catch (error) {
-    console.error('[Popup] Failed to open side panel:', error);
-    toast.error('Failed to open side panel');
   }
 }
 

@@ -5,7 +5,7 @@
  * Provides type safety for both requests and responses.
  */
 
-import type { SerializablePipelineState, SiteMode } from '../storage/schema';
+import type { SerializablePipelineState, SiteMode, Preset } from '../storage/schema';
 import type { FilterParameter } from '../../filters/base';
 import type { FilterCategory } from '../../filters/registry';
 
@@ -68,6 +68,10 @@ export type RequestMessage =
   // Bulk Operations
   | { type: 'LOAD_PIPELINE'; pipeline: SerializablePipelineState }
   | { type: 'LOAD_PRESET'; presetId: string }
+
+  // Presets (operations that need pipeline access)
+  | { type: 'SAVE_PRESET'; name: string; description?: string; tags?: string[] }
+  | { type: 'GET_PIPELINE_FOR_PRESET' }  // Gets serializable state for popup to handle
 
   // Site Mode
   | { type: 'GET_SITE_MODE' }
@@ -188,6 +192,20 @@ export interface CleanupResponse extends SuccessResponse {
 }
 
 /**
+ * Response for SAVE_PRESET.
+ */
+export interface SavePresetResponse extends SuccessResponse {
+  preset: Preset;
+}
+
+/**
+ * Response for GET_PIPELINE_FOR_PRESET.
+ */
+export interface PipelineForPresetResponse extends SuccessResponse {
+  pipeline: SerializablePipelineState;
+}
+
+/**
  * Map request types to their response types.
  * Used for type inference in the handler.
  */
@@ -205,6 +223,8 @@ export type ResponseFor<T extends RequestMessage['type']> =
   T extends 'RESET_FILTER' ? SuccessResponse :
   T extends 'LOAD_PIPELINE' ? SuccessResponse :
   T extends 'LOAD_PRESET' ? SuccessResponse :
+  T extends 'SAVE_PRESET' ? SavePresetResponse :
+  T extends 'GET_PIPELINE_FOR_PRESET' ? PipelineForPresetResponse :
   T extends 'GET_SITE_MODE' ? SiteModeResponse :
   T extends 'SET_SITE_MODE' ? SuccessResponse :
   T extends 'CLEANUP' ? CleanupResponse :

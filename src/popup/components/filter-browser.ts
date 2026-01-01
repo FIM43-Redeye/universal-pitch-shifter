@@ -1,8 +1,11 @@
 /**
  * Filter Browser Component
  *
- * A modal dialog for browsing and selecting filters to add.
+ * An inline panel for browsing and selecting filters to add.
  * Shows filters organized by category with search.
+ *
+ * Renders inline within the popup instead of as a modal overlay,
+ * which works better in the constrained extension popup viewport.
  */
 
 import type { FilterInfoMessage } from '../../lib/messages/types';
@@ -22,6 +25,9 @@ export type FilterSelectCallback = (filterTypeId: string) => void;
  * Options for the filter browser.
  */
 export interface FilterBrowserOptions {
+  /** Container element to render into */
+  container: HTMLElement;
+
   /** Callback when a filter is selected */
   onSelect: FilterSelectCallback;
 
@@ -34,18 +40,21 @@ export interface FilterBrowserOptions {
 // =============================================================================
 
 /**
- * Filter browser modal.
+ * Filter browser inline panel.
+ * Replaces container content when shown, restores on close.
  */
 export class FilterBrowser {
-  private container: HTMLElement;
+  private options: FilterBrowserOptions;
+  private panel: HTMLElement | null = null;
   private filters: FilterInfoMessage[] = [];
   private searchInput: HTMLInputElement | null = null;
   private categoryButtons: HTMLElement | null = null;
   private filterList: HTMLElement | null = null;
   private selectedCategory: FilterCategory | 'all' = 'all';
+  private savedContent: Node[] = [];
 
-  constructor(private options: FilterBrowserOptions) {
-    this.container = this.createContainer();
+  constructor(options: FilterBrowserOptions) {
+    this.options = options;
   }
 
   /**
@@ -54,54 +63,63 @@ export class FilterBrowser {
   show(filters: FilterInfoMessage[]): void {
     this.filters = filters;
     this.selectedCategory = 'all';
-    this.renderFilters();
 
-    document.body.appendChild(this.container);
-    this.container.classList.add('visible');
+    // Save current container content
+    this.savedContent = Array.from(this.options.container.childNodes);
+
+    // Clear container and add browser panel
+    this.options.container.innerHTML = '';
+    this.panel = this.createPanel();
+    this.options.container.appendChild(this.panel);
+
+    this.renderFilters();
 
     // Focus search input
     setTimeout(() => {
       this.searchInput?.focus();
-    }, 100);
+    }, 50);
 
     // Handle escape key
     document.addEventListener('keydown', this.handleKeyDown);
   }
 
   /**
-   * Hide the browser.
+   * Hide the browser and restore original content.
    */
   hide(): void {
-    this.container.classList.remove('visible');
     document.removeEventListener('keydown', this.handleKeyDown);
 
-    // Remove after animation
-    setTimeout(() => {
-      this.container.remove();
-    }, 200);
+    // Restore original content
+    this.options.container.innerHTML = '';
+    for (const node of this.savedContent) {
+      this.options.container.appendChild(node);
+    }
+    this.savedContent = [];
+    this.panel = null;
 
     this.options.onClose();
   }
 
   /**
-   * Create the browser container.
+   * Create the browser panel.
    */
-  private createContainer(): HTMLElement {
-    const overlay = document.createElement('div');
-    overlay.className = 'filter-browser-overlay';
+  private createPanel(): HTMLElement {
+    const panel = document.createElement('div');
+    panel.className = 'filter-browser-panel';
 
-    const modal = document.createElement('div');
-    modal.className = 'filter-browser-modal';
-
-    // Header
+    // Header with back button
     const header = document.createElement('div');
     header.className = 'filter-browser-header';
     header.innerHTML = `
-      <h2>Add Filter</h2>
-      <button class="filter-browser-close" title="Close">&times;</button>
+      <button class="filter-browser-back" title="Back">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <span class="filter-browser-title">Add Filter</span>
     `;
 
-    header.querySelector('.filter-browser-close')?.addEventListener('click', () => {
+    header.querySelector('.filter-browser-back')?.addEventListener('click', () => {
       this.hide();
     });
 
@@ -129,21 +147,12 @@ export class FilterBrowser {
     this.filterList.className = 'filter-browser-list';
 
     // Assemble
-    modal.appendChild(header);
-    modal.appendChild(searchContainer);
-    modal.appendChild(this.categoryButtons);
-    modal.appendChild(this.filterList);
+    panel.appendChild(header);
+    panel.appendChild(searchContainer);
+    panel.appendChild(this.categoryButtons);
+    panel.appendChild(this.filterList);
 
-    overlay.appendChild(modal);
-
-    // Close on overlay click
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        this.hide();
-      }
-    });
-
-    return overlay;
+    return panel;
   }
 
   /**
@@ -307,13 +316,31 @@ export class FilterBrowser {
 }
 
 /**
- * Create and show a filter browser.
+ * Create and show a filter browser inline in the given container.
  */
 export function showFilterBrowser(
   filters: FilterInfoMessage[],
-  onSelect: FilterSelectCallback
+  onSelect: FilterSelectCallback,
+  container?: HTMLElement
 ): FilterBrowser {
+  // Default to filters-container if no container specified
+  const targetContainer = container || document.getElementById('filters-container');
+
+  if (!targetContainer) {
+    console.error('[FilterBrowser] No container found');
+    // Fallback: just call onSelect with first filter if any
+    if (filters.length > 0) {
+      onSelect(filters[0].id);
+    }
+    return new FilterBrowser({
+      container: document.body,
+      onSelect,
+      onClose: () => {},
+    });
+  }
+
   const browser = new FilterBrowser({
+    container: targetContainer,
     onSelect,
     onClose: () => {},
   });
