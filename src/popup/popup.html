@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Filter Framework</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Audio Filters</h1>
+      <span id="status" class="status">Initializing...</span>
+    </header>
+
+    <!-- Site Info -->
+    <section class="site-section">
+      <div class="site-info">
+        <span id="site-hostname" class="site-hostname">-</span>
+        <div class="site-mode-toggle">
+          <button id="mode-auto" class="mode-btn" title="Automatically apply saved settings">Auto</button>
+          <button id="mode-neutral" class="mode-btn active" title="Start with no filters">Neutral</button>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <!-- Active Filters -->
+      <section class="filters-section">
+        <div class="section-title-row">
+          <h2 class="section-title">Active Filters</h2>
+          <button id="add-filter-btn" class="add-filter-btn" title="Add a filter">+ Add</button>
+        </div>
+
+        <div id="filters-container" class="filters-container">
+          <!-- Filter panels inserted here dynamically -->
+          <div class="filters-empty">
+            <div class="filters-empty-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </div>
+            <p class="filters-empty-text">No filters active</p>
+            <p class="filters-empty-hint">Click "+ Add" to get started</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Presets Section -->
+      <section class="presets-section">
+        <h2 class="section-header" id="presets-toggle">
+          Presets
+          <span class="chevron">+</span>
+        </h2>
+        <div id="presets-content" class="collapsible collapsed">
+          <div class="preset-buttons">
+            <button id="preset-save" class="btn preset-btn">Save</button>
+            <button id="preset-load" class="btn preset-btn">Load</button>
+            <button id="preset-export" class="btn preset-btn">Export</button>
+          </div>
+          <div id="preset-list" class="preset-list">
+            <!-- Preset items inserted here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Debug Section -->
+      <section class="debug-section">
+        <h2 class="section-header" id="debug-toggle">
+          Debug
+          <span class="chevron">+</span>
+        </h2>
+        <div id="debug-content" class="collapsible collapsed">
+          <div class="debug-buttons">
+            <button id="debug-status" class="btn debug-btn">Status</button>
+            <button id="debug-cleanup" class="btn debug-btn">Cleanup</button>
+            <button id="debug-clear" class="btn debug-btn">Clear All</button>
+            <button id="debug-vinesauce" class="btn debug-btn vinesauce">Vinesauce</button>
+          </div>
+          <div class="debug-output-container">
+            <pre id="debug-output" class="debug-output"></pre>
+            <button id="debug-copy" class="copy-btn" title="Copy to clipboard">Copy</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span id="engine-label" class="engine-label">SoundTouch</span>
+      <span class="separator">|</span>
+      <a href="https://github.com/anthropics/universal-pitch-shifter" target="_blank">
+        GPL-2.0
+      </a>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+</html>

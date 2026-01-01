@@ -1,0 +1,25 @@
+{
+  "name": "universal-pitch-shifter",
+  "version": "0.1.0",
+  "description": "Free and open-source pitch shifter for browser audio/video. Uses RubberBand for high-quality processing.",
+  "author": "triple",
+  "license": "GPL-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build",
+    "build:chrome": "vite build --mode chrome",
+    "build:firefox": "vite build --mode firefox",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/firefox-webext-browser": "^120.0.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.0",
+    "vite-plugin-static-copy": "^3.1.4",
+    "vite-plugin-web-extension": "^4.1.0"
+  },
+  "private": true
+}
