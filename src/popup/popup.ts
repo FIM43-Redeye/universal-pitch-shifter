@@ -178,6 +178,7 @@ function renderFilters(): void {
 
   if (activeFilters.length === 0) {
     filtersContainer.appendChild(createEmptyFiltersMessage());
+    updateBadge(0);
     return;
   }
 
@@ -192,6 +193,10 @@ function renderFilters(): void {
     });
     filtersContainer.appendChild(panel);
   }
+
+  // Update badge with enabled filter count
+  const enabledCount = activeFilters.filter(f => f.enabled).length;
+  updateBadge(enabledCount);
 }
 
 async function handleAddFilter(): Promise<void> {
@@ -502,6 +507,14 @@ function setupCollapsible(toggle: HTMLElement, content: HTMLElement): void {
 function setStatus(text: string, className: string): void {
   statusIndicator.textContent = text;
   statusIndicator.className = `status ${className}`;
+}
+
+function updateBadge(filterCount: number): void {
+  // Send badge update to service worker
+  const text = filterCount > 0 ? String(filterCount) : '';
+  chrome.runtime.sendMessage({ command: 'set-badge', text }).catch(() => {
+    // Ignore errors - service worker might not be ready
+  });
 }
 
 async function sendMessage(message: RequestMessage): Promise<unknown> {

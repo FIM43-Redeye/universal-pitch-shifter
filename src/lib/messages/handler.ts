@@ -405,6 +405,25 @@ export async function handleMessage(
         } as VinesauceResponse;
       }
 
+      case 'TOGGLE_BYPASS': {
+        // Toggle bypass on all filters
+        // Logic: if any filter is active (not bypassed), bypass all
+        // If all are bypassed, un-bypass all
+        const filters = Array.from(context.filters.values());
+        if (filters.length === 0) {
+          return { success: true };
+        }
+
+        const anyActive = filters.some(({ filter }) => !filter.bypassed);
+        const newBypassState = anyActive; // If any active, bypass all
+
+        for (const { filter } of filters) {
+          filter.bypassed = newBypassState;
+        }
+
+        return { success: true };
+      }
+
       case 'LEGACY':
         return { success: false, error: `Unsupported legacy command: ${message.command}` };
 

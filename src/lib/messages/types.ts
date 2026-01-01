@@ -79,6 +79,7 @@ export type RequestMessage =
 
   // Utility
   | { type: 'CLEANUP' }
+  | { type: 'TOGGLE_BYPASS' }
 
   // Easter eggs (keeping backward compatibility)
   | { type: 'VINESAUCE' }

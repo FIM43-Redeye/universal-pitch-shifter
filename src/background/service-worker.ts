@@ -37,15 +37,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       break;
 
-    case "open-sidepanel":
+    case "open-sidepanel": {
       // Open the side panel for the current window
-      chrome.sidePanel.open({ windowId: sender.tab?.windowId }).then(() => {
+      const windowId = sender.tab?.windowId;
+      if (!windowId) {
+        sendResponse({ success: false, error: 'No window ID available' });
+        break;
+      }
+      chrome.sidePanel.open({ windowId }).then(() => {
         sendResponse({ success: true });
       }).catch((error) => {
         console.error("[UPS] Failed to open side panel:", error);
         sendResponse({ success: false, error: String(error) });
       });
       return true; // Async response
+    }
 
     case "set-badge":
       // Update the badge text (for pitch display)
@@ -77,6 +83,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
   activeTabs.delete(tabId);
   chrome.action.setBadgeText({ text: '', tabId });
+});
+
+// Handle keyboard shortcuts
+chrome.commands.onCommand.addListener(async (command) => {
+  console.log("[UPS] Command received:", command);
+
+  // Get the active tab
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) return;
+
+  switch (command) {
+    case "toggle-bypass":
+      // Send toggle message to content script
+      chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_BYPASS' }).catch(() => {
+        console.log("[UPS] Content script not ready for toggle-bypass");
+      });
+      break;
+  }
 });
 
 console.log("[UPS] Service worker initialized");
