@@ -192,20 +192,39 @@ function createPanelHeader(
     collapseBtn.title = isCollapsed ? 'Expand' : 'Collapse';
   });
 
-  // Remove button
+  // Remove button - uses inline confirmation instead of modal
   const removeBtn = document.createElement('button');
   removeBtn.className = 'filter-panel-btn remove-btn';
   removeBtn.innerHTML = '&times;';
   removeBtn.title = 'Remove filter';
+
+  let confirmTimeout: ReturnType<typeof setTimeout> | null = null;
+
   removeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    // Confirm for non-trivial filters
-    if (filterInfo && filterInfo.parameters.length > 0) {
-      if (!confirm(`Remove ${filter.displayName}?`)) {
-        return;
+
+    // If already in confirm state, proceed with removal
+    if (removeBtn.classList.contains('confirming')) {
+      if (confirmTimeout) {
+        clearTimeout(confirmTimeout);
+        confirmTimeout = null;
       }
+      callbacks.onRemove(filter.instanceId);
+      return;
     }
-    callbacks.onRemove(filter.instanceId);
+
+    // Enter confirm state
+    removeBtn.classList.add('confirming');
+    removeBtn.innerHTML = '?';
+    removeBtn.title = 'Click again to confirm';
+
+    // Reset after 2 seconds if not confirmed
+    confirmTimeout = setTimeout(() => {
+      removeBtn.classList.remove('confirming');
+      removeBtn.innerHTML = '&times;';
+      removeBtn.title = 'Remove filter';
+      confirmTimeout = null;
+    }, 2000);
   });
 
   controls.appendChild(enableBtn);

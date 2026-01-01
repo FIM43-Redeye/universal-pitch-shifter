@@ -374,6 +374,11 @@ footer a:hover {
   to { transform: scale(1.02); }
 }
 
+@keyframes pulse-confirm {
+  from { opacity: 1; }
+  to { opacity: 0.6; }
+}
+
 .debug-output-container {
   position: relative;
 }
@@ -650,6 +655,13 @@ footer a:hover {
   background: var(--danger);
   border-color: var(--danger);
   color: white;
+}
+
+.filter-panel-btn.remove-btn.confirming {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+  animation: pulse-confirm 0.5s ease-in-out infinite alternate;
 }
 
 .filter-panel-content {
